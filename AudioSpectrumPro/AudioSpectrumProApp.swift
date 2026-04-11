@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct AudioSpectrumProApp: App {
+    @StateObject private var langManager = LanguageManager()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(langManager)
         }
     }
 }

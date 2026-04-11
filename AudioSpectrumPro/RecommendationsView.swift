@@ -1,4 +1,3 @@
-
 //  RecommendationsView.swift
 //  AudioSpectrumPro
 
@@ -6,6 +5,7 @@ import SwiftUI
 
 struct RecommendationsView: View {
     let recommendations: [EQRecommendation]
+    @EnvironmentObject private var langManager: LanguageManager
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -17,7 +17,7 @@ struct RecommendationsView: View {
     }
 
     private var header: some View {
-        Text("Рекомендации EQ")
+        Text(langManager.l10n.eqRecommendations)
             .font(.system(size: 13, weight: .semibold, design: .monospaced))
             .foregroundStyle(Color.white.opacity(0.7))
             .padding(.horizontal, 12)
@@ -38,6 +38,7 @@ struct RecommendationsView: View {
 
 struct RecommendationRowView: View {
     let recommendation: EQRecommendation
+    @EnvironmentObject private var langManager: LanguageManager
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
@@ -80,7 +81,13 @@ struct RecommendationRowView: View {
     }
 
     private var detailText: some View {
-        Text(recommendation.detail)
+        let l10n = langManager.l10n
+        let cut = Int(recommendation.cutDB.rounded())
+        let text = recommendation.urgency == .ok
+            ? l10n.spectrumClean
+            : recommendation.band.description(in: l10n, cut: cut)
+
+        return Text(text)
             .font(.system(size: 11))
             .foregroundStyle(Color.white.opacity(0.5))
             .fixedSize(horizontal: false, vertical: true)
@@ -89,8 +96,8 @@ struct RecommendationRowView: View {
     private var urgencyColor: Color {
         switch recommendation.urgency {
         case .critical: return .red
-        case .warning: return .yellow
-        case .ok: return .green
+        case .warning:  return .yellow
+        case .ok:       return .green
         }
     }
 }
@@ -99,22 +106,11 @@ struct RecommendationRowView: View {
 struct RecommendationsView_Previews: PreviewProvider {
     static var previews: some View {
         RecommendationsView(recommendations: [
-            EQRecommendation(
-                frequency: 820, cutDB: 8, urgency: .critical,
-                bandwidthQ: 2.0,
-                detail: "Нижняя середина — гулкость зала. Срез -8 dB."
-            ),
-            EQRecommendation(
-                frequency: 2400, cutDB: 4, urgency: .warning,
-                bandwidthQ: 1.4,
-                detail: "Присутствие — картонность. Срез -4 dB."
-            ),
-            EQRecommendation(
-                frequency: 0, cutDB: 0, urgency: .ok,
-                bandwidthQ: 0,
-                detail: "Спектр чистый — обратная связь маловероятна."
-            )
+            EQRecommendation(frequency: 820,  cutDB: 8, urgency: .critical, bandwidthQ: 2.0, band: .lowMid),
+            EQRecommendation(frequency: 2400, cutDB: 4, urgency: .warning,  bandwidthQ: 1.4, band: .presence),
+            EQRecommendation(frequency: 0,    cutDB: 0, urgency: .ok,       bandwidthQ: 0,   band: .mid)
         ])
+        .environmentObject(LanguageManager())
         .preferredColorScheme(.dark)
     }
 }

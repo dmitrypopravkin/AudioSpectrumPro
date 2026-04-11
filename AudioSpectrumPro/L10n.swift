@@ -1,0 +1,105 @@
+//  L10n.swift
+//  AudioSpectrumPro
+
+import Foundation
+
+struct L10n {
+    // MARK: - General UI
+    let appTitle:           String
+    let start:              String
+    let stop:               String
+    let startAnalysis:      String  // accessibility label
+    let stopAnalysis:       String  // accessibility label
+    let errorTitle:         String
+    let errorOK:            String
+    let language:           String
+    let microphoneError:    String
+
+    // MARK: - Recommendations panel
+    let eqRecommendations:  String
+    let spectrumClean:      String
+
+    // MARK: - EQ band descriptions (cut in dB is injected at call site)
+    let subBass:            (Int) -> String
+    let lowMid:             (Int) -> String
+    let mid:                (Int) -> String
+    let upperMid:           (Int) -> String
+    let presence:           (Int) -> String
+    let high:               (Int) -> String
+
+    // MARK: - Factory
+
+    static func make(for language: Language) -> L10n {
+        switch language {
+        case .english:   return .english
+        case .russian:   return .russian
+        case .ukrainian: return .ukrainian
+        }
+    }
+
+    // MARK: - English
+
+    static let english = L10n(
+        appTitle:           "Audio Spectrum Pro",
+        start:              "Start",
+        stop:               "Stop",
+        startAnalysis:      "Start analysis",
+        stopAnalysis:       "Stop analysis",
+        errorTitle:         "Error",
+        errorOK:            "OK",
+        language:           "Language",
+        microphoneError:    "Microphone access denied. Allow access in Settings → Privacy.",
+        eqRecommendations:  "EQ Recommendations",
+        spectrumClean:      "Spectrum is clean — feedback unlikely.",
+        subBass:            { "Sub-bass — room rumble. Cut -\($0) dB removes the hum." },
+        lowMid:             { "Low-mid — muddiness. Cut -\($0) dB." },
+        mid:                { "Mid — nasal sound. Cut -\($0) dB improves intelligibility." },
+        upperMid:           { "Upper-mid — harshness. Cut -\($0) dB reduces tension." },
+        presence:           { "Presence — boxiness. Cut -\($0) dB won't hurt clarity." },
+        high:               { "High range — sibilance. Cut -\($0) dB." }
+    )
+
+    // MARK: - Russian
+
+    static let russian = L10n(
+        appTitle:           "Audio Spectrum Pro",
+        start:              "Старт",
+        stop:               "Стоп",
+        startAnalysis:      "Начать анализ",
+        stopAnalysis:       "Остановить анализ",
+        errorTitle:         "Ошибка",
+        errorOK:            "OK",
+        language:           "Язык",
+        microphoneError:    "Нет доступа к микрофону. Разрешите доступ в Настройках → Конфиденциальность.",
+        eqRecommendations:  "Рекомендации EQ",
+        spectrumClean:      "Спектр чистый — обратная связь маловероятна.",
+        subBass:            { "Суббас — гул помещения. Срез -\($0) dB уберёт гудение." },
+        lowMid:             { "Нижняя середина — гулкость зала. Срез -\($0) dB." },
+        mid:                { "Середина — гнусавость. Срез -\($0) dB улучшит разборчивость." },
+        upperMid:           { "Верхняя середина — резкость. Срез -\($0) dB снизит напряжённость." },
+        presence:           { "Присутствие — картонность. Срез -\($0) dB не повредит разборчивости." },
+        high:               { "Верхний диапазон — свистящие призвуки. Срез -\($0) dB." }
+    )
+
+    // MARK: - Ukrainian
+
+    static let ukrainian = L10n(
+        appTitle:           "Audio Spectrum Pro",
+        start:              "Старт",
+        stop:               "Стоп",
+        startAnalysis:      "Почати аналіз",
+        stopAnalysis:       "Зупинити аналіз",
+        errorTitle:         "Помилка",
+        errorOK:            "OK",
+        language:           "Мова",
+        microphoneError:    "Немає доступу до мікрофона. Дозвольте доступ у Налаштуваннях → Конфіденційність.",
+        eqRecommendations:  "Рекомендації EQ",
+        spectrumClean:      "Спектр чистий — зворотний зв'язок малоймовірний.",
+        subBass:            { "Суббас — гул приміщення. Зріз -\($0) dB приберe гудіння." },
+        lowMid:             { "Нижня середина — каламутність залу. Зріз -\($0) dB." },
+        mid:                { "Середина — гнусавість. Зріз -\($0) dB покращить розбірливість." },
+        upperMid:           { "Верхня середина — різкість. Зріз -\($0) dB знизить напругу." },
+        presence:           { "Присутність — картонність. Зріз -\($0) dB не зашкодить чіткості." },
+        high:               { "Верхній діапазон — свистячі призвуки. Зріз -\($0) dB." }
+    )
+}

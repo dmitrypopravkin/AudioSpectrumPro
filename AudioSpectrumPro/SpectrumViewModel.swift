@@ -74,7 +74,7 @@ final class SpectrumViewModel: ObservableObject {
                 cutDB: 0,
                 urgency: .ok,
                 bandwidthQ: 0,
-                detail: "Спектр чистый — обратная связь маловероятна."
+                band: .mid
             )]
         }
 
@@ -82,35 +82,16 @@ final class SpectrumViewModel: ObservableObject {
             let cutDB = min(peak.prominence * 0.75, 12.0)
             let urgency: EQRecommendation.Urgency = peak.prominence >= 18 ? .critical : .warning
             let bandwidthQ: Float = peak.prominence >= 15 ? 2.0 : 1.4
-            let detail = describeFrequency(peak.frequency, cutDB: cutDB)
 
             return EQRecommendation(
                 frequency: peak.frequency,
                 cutDB: cutDB,
                 urgency: urgency,
                 bandwidthQ: bandwidthQ,
-                detail: detail
+                band: FrequencyBand.from(peak.frequency)
             )
         }
         .sorted { $0.urgency.sortPriority > $1.urgency.sortPriority }
-    }
-
-    private func describeFrequency(_ freq: Float, cutDB: Float) -> String {
-        let cut = Int(cutDB.rounded())
-        switch freq {
-        case ..<100:
-            return "Суббас — гул помещения. Срез -\(cut) dB уберёт гудение."
-        case 100..<300:
-            return "Нижняя середина — гулкость зала. Срез -\(cut) dB."
-        case 300..<800:
-            return "Середина — гнусавость. Срез -\(cut) dB улучшит разборчивость."
-        case 800..<2000:
-            return "Верхняя середина — резкость. Срез -\(cut) dB снизит напряжённость."
-        case 2000..<5000:
-            return "Присутствие — картонность. Срез -\(cut) dB не повредит разборчивости."
-        default:
-            return "Верхний диапазон — свистящие призвуки. Срез -\(cut) dB."
-        }
     }
 }
 
@@ -141,11 +122,11 @@ extension SpectrumViewModel {
         vm.recommendations = [
             EQRecommendation(
                 frequency: 820, cutDB: 8, urgency: .critical, bandwidthQ: 2.0,
-                detail: "Нижняя середина — гулкость зала. Срез -8 dB уберёт обратную связь."
+                band: .lowMid
             ),
             EQRecommendation(
                 frequency: 2400, cutDB: 4, urgency: .warning, bandwidthQ: 1.4,
-                detail: "Присутствие — картонность. Срез -4 dB не повредит разборчивости."
+                band: .presence
             )
         ]
 

@@ -22,6 +22,9 @@
 		ED50282C2F8AC36C00A843D9 /* FFTProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED50281C2F8AC1DE00A843D9 /* FFTProcessor.swift */; };
 		ED50282D2F8AC36C00A843D9 /* AudioSpectrumProApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED5027EA2F8ABD6F00A843D9 /* AudioSpectrumProApp.swift */; };
 		ED50282E2F8AC36C00A843D9 /* EQRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED5028162F8AC1DE00A843D9 /* EQRecommendation.swift */; };
+		ED5028332F8ACB0A00A843D9 /* Language.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED5028302F8ACB0A00A843D9 /* Language.swift */; };
+		ED5028342F8ACB0A00A843D9 /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED5028312F8ACB0A00A843D9 /* L10n.swift */; };
+		ED5028352F8ACB0A00A843D9 /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED5028322F8ACB0A00A843D9 /* LanguageManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +65,9 @@
 		ED50281B2F8AC1DE00A843D9 /* FrequencyPeak.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrequencyPeak.swift; sourceTree = "<group>"; };
 		ED50281C2F8AC1DE00A843D9 /* FFTProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FFTProcessor.swift; sourceTree = "<group>"; };
 		ED50282F2F8AC3DA00A843D9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		ED5028302F8ACB0A00A843D9 /* Language.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Language.swift; sourceTree = "<group>"; };
+		ED5028312F8ACB0A00A843D9 /* L10n.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
+		ED5028322F8ACB0A00A843D9 /* LanguageManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,6 +128,9 @@
 				ED5028152F8AC1DE00A843D9 /* SpectrumView.swift */,
 				ED5028172F8AC1DE00A843D9 /* SpectrumViewModel.swift */,
 				ED5027EA2F8ABD6F00A843D9 /* AudioSpectrumProApp.swift */,
+				ED5028312F8ACB0A00A843D9 /* L10n.swift */,
+				ED5028302F8ACB0A00A843D9 /* Language.swift */,
+				ED5028322F8ACB0A00A843D9 /* LanguageManager.swift */,
 				ED5027EC2F8ABD6F00A843D9 /* ContentView.swift */,
 				ED5027EE2F8ABD7100A843D9 /* Assets.xcassets */,
 				ED5027F02F8ABD7100A843D9 /* AudioSpectrumPro.entitlements */,
@@ -286,6 +295,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED5028282F8AC36C00A843D9 /* PeakDetector.swift in Sources */,
+				ED5028352F8ACB0A00A843D9 /* LanguageManager.swift in Sources */,
 				ED5028272F8AC36C00A843D9 /* AudioEngine.swift in Sources */,
 				ED50282E2F8AC36C00A843D9 /* EQRecommendation.swift in Sources */,
 				ED50282B2F8AC36C00A843D9 /* FrequencyPeak.swift in Sources */,
@@ -293,8 +303,10 @@
 				ED50282A2F8AC36C00A843D9 /* ContentView.swift in Sources */,
 				ED5028252F8AC36C00A843D9 /* SpectrumView.swift in Sources */,
 				ED50282C2F8AC36C00A843D9 /* FFTProcessor.swift in Sources */,
+				ED5028342F8ACB0A00A843D9 /* L10n.swift in Sources */,
 				ED5028292F8AC36C00A843D9 /* SpectrumViewModel.swift in Sources */,
 				ED5028262F8AC36C00A843D9 /* RecommendationsView.swift in Sources */,
+				ED5028332F8ACB0A00A843D9 /* Language.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
