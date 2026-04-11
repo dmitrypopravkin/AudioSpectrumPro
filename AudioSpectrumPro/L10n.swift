@@ -15,6 +15,28 @@ struct L10n {
     let language:           String
     let microphoneError:    String
 
+    // MARK: - Display modes
+    let modeSpectrum:       String
+    let modeSpectrograph:   String
+    let modeTuner:          String
+    let modeOscilloscope:   String
+    let modeLoudness:       String
+
+    // MARK: - Tuner
+    let tunerListening:     String
+    let tunerCents:         String
+    let tunerSettings:      String
+    let tunerReferencePitch: String
+    let tunerCapo:          String
+    let tunerNoiseGate:     String
+    let tunerInTune:        String
+    let tunerCustom:        String
+
+    // MARK: - Loudness
+    let loudnessRMS:        String
+    let loudnessPeak:       String
+    let loudnessHistory:    String
+
     // MARK: - Recommendations panel
     let eqRecommendations:  String
     let spectrumClean:      String
@@ -49,6 +71,22 @@ struct L10n {
         errorOK:            "OK",
         language:           "Language",
         microphoneError:    "Microphone access denied. Allow access in Settings → Privacy.",
+        modeSpectrum:       "Spectrum",
+        modeSpectrograph:   "Spectrograph",
+        modeTuner:          "Tuner",
+        modeOscilloscope:   "Oscilloscope",
+        modeLoudness:       "Loudness",
+        tunerListening:     "Listening…",
+        tunerCents:         "cents",
+        tunerSettings:      "Tuner Settings",
+        tunerReferencePitch: "Reference Pitch (A4)",
+        tunerCapo:          "Capo",
+        tunerNoiseGate:     "Min. Signal",
+        tunerInTune:        "In Tune ✓",
+        tunerCustom:        "Custom",
+        loudnessRMS:        "RMS",
+        loudnessPeak:       "Peak",
+        loudnessHistory:    "History",
         eqRecommendations:  "EQ Recommendations",
         spectrumClean:      "Spectrum is clean — feedback unlikely.",
         subBass:            { "Sub-bass — room rumble. Cut -\($0) dB removes the hum." },
@@ -71,6 +109,22 @@ struct L10n {
         errorOK:            "OK",
         language:           "Язык",
         microphoneError:    "Нет доступа к микрофону. Разрешите доступ в Настройках → Конфиденциальность.",
+        modeSpectrum:       "Спектр",
+        modeSpectrograph:   "Спектрограф",
+        modeTuner:          "Тюнер",
+        modeOscilloscope:   "Осциллоскоп",
+        modeLoudness:       "Громкость",
+        tunerListening:     "Слушаю…",
+        tunerCents:         "центов",
+        tunerSettings:      "Настройки тюнера",
+        tunerReferencePitch: "Эталон (A4)",
+        tunerCapo:          "Каподастр",
+        tunerNoiseGate:     "Мин. сигнал",
+        tunerInTune:        "В строе ✓",
+        tunerCustom:        "Своё",
+        loudnessRMS:        "RMS",
+        loudnessPeak:       "Пик",
+        loudnessHistory:    "История",
         eqRecommendations:  "Рекомендации EQ",
         spectrumClean:      "Спектр чистый — обратная связь маловероятна.",
         subBass:            { "Суббас — гул помещения. Срез -\($0) dB уберёт гудение." },
@@ -93,6 +147,22 @@ struct L10n {
         errorOK:            "OK",
         language:           "Мова",
         microphoneError:    "Немає доступу до мікрофона. Дозвольте доступ у Налаштуваннях → Конфіденційність.",
+        modeSpectrum:       "Спектр",
+        modeSpectrograph:   "Спектрограф",
+        modeTuner:          "Тюнер",
+        modeOscilloscope:   "Осцилоскоп",
+        modeLoudness:       "Гучність",
+        tunerListening:     "Слухаю…",
+        tunerCents:         "центів",
+        tunerSettings:      "Налаштування тюнера",
+        tunerReferencePitch: "Еталон (A4)",
+        tunerCapo:          "Капо",
+        tunerNoiseGate:     "Мін. сигнал",
+        tunerInTune:        "В строї ✓",
+        tunerCustom:        "Своє",
+        loudnessRMS:        "RMS",
+        loudnessPeak:       "Пік",
+        loudnessHistory:    "Історія",
         eqRecommendations:  "Рекомендації EQ",
         spectrumClean:      "Спектр чистий — зворотний зв'язок малоймовірний.",
         subBass:            { "Суббас — гул приміщення. Зріз -\($0) dB приберe гудіння." },

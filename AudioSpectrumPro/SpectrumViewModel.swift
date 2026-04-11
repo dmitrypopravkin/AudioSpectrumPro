@@ -7,13 +7,33 @@ import SwiftUI
 
 @MainActor
 final class SpectrumViewModel: ObservableObject {
+    // Spectrum
     @Published var displayData: [Float] = Array(repeating: FFTProcessor.minDB, count: FFTProcessor.displayBinCount)
     @Published var peaks: [FrequencyPeak] = []
     @Published var recommendations: [EQRecommendation] = []
+    // Spectrograph
+    @Published var waterfallRows: [[Float]] = []
+    // Oscilloscope
+    @Published var rawSamples: [Float] = []
+    // Tuner
+    @Published var tunerReading: TunerReading? = nil
+    // Loudness
+    @Published var rmsDB: Float = FFTProcessor.minDB
+    @Published var truePeakDB: Float = FFTProcessor.minDB
+    @Published var loudnessHistory: [Float] = []
+    // State
     @Published var isRunning = false
     @Published var errorMessage: String?
 
-    private let audioEngine = AudioEngine()
+    private let maxWaterfallRows = 60
+    private let maxLoudnessHistory = 120
+
+    /// Set by TunerView settings; not @Published to avoid unnecessary redraws.
+    var referenceA4: Float = 440.0
+    /// Noise gate threshold in dB; set by TunerView settings.
+    var noiseGateDB: Float = -50.0
+
+    private var audioEngine = AudioEngine()
     private let fftProcessor = FFTProcessor()
     private let peakDetector = PeakDetector()
 
@@ -23,6 +43,8 @@ final class SpectrumViewModel: ObservableObject {
 
     func start() {
         guard !isRunning else { return }
+        // Recreate engine so the AsyncStream is fresh after a previous stop
+        audioEngine = AudioEngine()
         isRunning = true
         errorMessage = nil
 
@@ -40,9 +62,32 @@ final class SpectrumViewModel: ObservableObject {
                         fftSize: fftProcessor.fftSize
                     )
 
+                    // Spectrum
                     displayData = smoothedData
                     peaks = detectedPeaks
                     recommendations = makeRecommendations(from: detectedPeaks)
+
+                    // Spectrograph waterfall
+                    var newRows = waterfallRows
+                    newRows.insert(smoothedData, at: 0)
+                    if newRows.count > maxWaterfallRows { newRows = Array(newRows.prefix(maxWaterfallRows)) }
+                    waterfallRows = newRows
+
+                    // Oscilloscope
+                    rawSamples = samples
+
+                    // Tuner
+                    tunerReading = fftProcessor.detectPitch(rawFFT, referenceA4: referenceA4, noiseGateDB: noiseGateDB)
+
+                    // Loudness
+                    let rms = fftProcessor.rmsDB(samples)
+                    let peak = fftProcessor.truePeakDB(samples)
+                    rmsDB = rms
+                    truePeakDB = max(truePeakDB * 0.999, peak)   // slow decay for true peak hold
+                    var newHistory = loudnessHistory
+                    newHistory.append(rms)
+                    if newHistory.count > maxLoudnessHistory { newHistory = Array(newHistory.dropFirst()) }
+                    loudnessHistory = newHistory
                 }
             } catch {
                 errorMessage = error.localizedDescription

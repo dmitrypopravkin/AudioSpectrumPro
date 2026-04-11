@@ -115,4 +115,102 @@ final class FFTProcessor {
         let logF = log10(max(frequency, minFrequency))
         return (logF - logMin) / (logMax - logMin)
     }
+
+    /// RMS level in dB from raw PCM samples.
+    func rmsDB(_ samples: [Float]) -> Float {
+        guard !samples.isEmpty else { return FFTProcessor.minDB }
+        var sumSquares: Float = 0
+        vDSP_svesq(samples, 1, &sumSquares, vDSP_Length(samples.count))
+        let rms = sqrtf(sumSquares / Float(samples.count))
+        return max(20.0 * log10f(max(rms, 1e-10)), FFTProcessor.minDB)
+    }
+
+    /// True peak level in dB (maximum absolute sample value).
+    func truePeakDB(_ samples: [Float]) -> Float {
+        guard !samples.isEmpty else { return FFTProcessor.minDB }
+        var peak: Float = 0
+        vDSP_maxmgv(samples, 1, &peak, vDSP_Length(samples.count))
+        return max(20.0 * log10f(max(peak, 1e-10)), FFTProcessor.minDB)
+    }
+
+    /// Detect dominant pitch using FFT peak with quadratic interpolation.
+    /// Returns (frequency in Hz, note name, octave, cents deviation) or nil if no clear pitch.
+    func detectPitch(_ fftData: [Float], referenceA4: Float = 440.0, noiseGateDB: Float = -50.0) -> TunerReading? {
+        let halfN = fftData.count
+        let freqPerBin = sampleRate / Float(fftSize)
+
+        // Find loudest bin in musical range (80 Hz – 2000 Hz)
+        let minBin = Int(80.0 / freqPerBin)
+        let maxBin = min(Int(2000.0 / freqPerBin), halfN - 2)
+        guard minBin < maxBin else { return nil }
+
+        var peakBin = minBin
+        for i in (minBin + 1)..<maxBin {
+            if fftData[i] > fftData[peakBin] { peakBin = i }
+        }
+
+        guard fftData[peakBin] > noiseGateDB else { return nil }
+
+        // Quadratic interpolation for sub-bin accuracy
+        let y0 = fftData[peakBin - 1]
+        let y1 = fftData[peakBin]
+        let y2 = fftData[peakBin + 1]
+        let denom = y0 - 2 * y1 + y2
+        let correction: Float = denom != 0 ? 0.5 * (y0 - y2) / denom : 0
+        let refinedBin = Float(peakBin) + correction
+        let freq = refinedBin * freqPerBin
+
+        return TunerReading(frequency: freq, referenceA4: referenceA4)
+    }
+
+    /// Finds the closest string in the given tuning to the detected frequency, accounting for capo.
+    func nearestString(
+        to frequency: Float,
+        in tuning: InstrumentTuning,
+        referenceA4: Float,
+        capo: Int
+    ) -> (string: InstrumentString, centsOff: Int)? {
+        guard !tuning.strings.isEmpty else { return nil }
+
+        var bestString: InstrumentString = tuning.strings[0]
+        var bestCentsOff: Int = Int.max
+
+        for string in tuning.strings {
+            // Capo shifts pitch up by `capo` semitones
+            let shiftedMidi = string.midiNote + capo
+            let targetFreq = referenceA4 * pow(2.0, Float(shiftedMidi - 69) / 12.0)
+            let semitones = 12.0 * log2(frequency / targetFreq)
+            let cents = Int((semitones * 100.0).rounded())
+            // clamp to ±50 range for closest-string logic (use raw distance)
+            let dist = abs(cents)
+            if dist < abs(bestCentsOff) {
+                bestCentsOff = cents
+                bestString = string
+            }
+        }
+
+        return (string: bestString, centsOff: bestCentsOff)
+    }
+}
+
+struct TunerReading {
+    static let noteNames = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"]
+
+    let frequency: Float
+    let note: String
+    let octave: Int
+    let cents: Int      // -50…+50
+
+    init(frequency: Float, referenceA4: Float = 440.0) {
+        self.frequency = frequency
+        let semitones = 12.0 * log2(frequency / referenceA4)
+        let rounded = semitones.rounded()
+        self.cents = Int(((semitones - rounded) * 100).rounded())
+        let index = ((Int(rounded) % 12) + 12 + 9) % 12
+        self.note = TunerReading.noteNames[index]
+        self.octave = 4 + (Int(rounded) + 9) / 12
+    }
+
+    /// 0 = perfectly in tune, 1 = 50 cents off
+    var inTuneRatio: Float { 1.0 - abs(Float(cents)) / 50.0 }
 }

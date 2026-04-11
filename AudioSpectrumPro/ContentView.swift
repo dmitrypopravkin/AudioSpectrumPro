@@ -12,6 +12,7 @@ struct ContentView: View {
     @EnvironmentObject private var langManager: LanguageManager
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var showingLanguagePicker = false
+    @State private var displayMode: DisplayMode = .spectrum
 
     @MainActor
     init(viewModel: SpectrumViewModel? = nil) {
@@ -42,24 +43,34 @@ struct ContentView: View {
     // MARK: - Layouts
 
     private var iPadLayout: some View {
-        HStack(spacing: 0) {
-            VStack(spacing: 0) {
-                titleBar
-                spectrumPanel
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                VStack(spacing: 0) {
+                    titleBar
+                    modeTabBar
+                    mainPanel
+                }
+                if displayMode == .spectrum {
+                    Divider().background(Color.white.opacity(0.15))
+                    RecommendationsView(recommendations: viewModel.recommendations)
+                        .frame(width: 280)
+                }
             }
-            Divider().background(Color.white.opacity(0.15))
-            RecommendationsView(recommendations: viewModel.recommendations)
-                .frame(width: 280)
+            bottomBar
         }
     }
 
     private var iPhoneLayout: some View {
         VStack(spacing: 0) {
             titleBar
-            spectrumPanel
-            Divider().background(Color.white.opacity(0.15))
-            RecommendationsView(recommendations: viewModel.recommendations)
-                .frame(maxHeight: 200)
+            modeTabBar
+            mainPanel
+            if displayMode == .spectrum {
+                Divider().background(Color.white.opacity(0.15))
+                RecommendationsView(recommendations: viewModel.recommendations)
+                    .frame(maxHeight: 160)
+            }
+            bottomBar
         }
     }
 
@@ -72,16 +83,67 @@ struct ContentView: View {
                 .foregroundStyle(.white)
             Spacer()
             languageButton
-            startStopButton
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(Color(white: 0.06))
     }
 
-    private var spectrumPanel: some View {
-        SpectrumView(displayData: viewModel.displayData, peaks: viewModel.peaks)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    private var modeTabBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 2) {
+                ForEach(DisplayMode.allCases) { mode in
+                    ModeTabButton(
+                        mode: mode,
+                        isSelected: displayMode == mode,
+                        l10n: langManager.l10n
+                    ) { displayMode = mode }
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+        }
+        .background(Color(white: 0.05))
+    }
+
+    private var mainPanel: some View {
+        Group {
+            switch displayMode {
+            case .spectrum:
+                SpectrumView(displayData: viewModel.displayData, peaks: viewModel.peaks)
+            case .spectrograph:
+                SpectrographView(rows: viewModel.waterfallRows)
+            case .tuner:
+                TunerView(reading: viewModel.tunerReading)
+                    .environmentObject(viewModel)
+            case .oscilloscope:
+                OscilloscopeView(samples: viewModel.rawSamples)
+            case .loudness:
+                LoudnessView(
+                    rmsDB: viewModel.rmsDB,
+                    truePeakDB: viewModel.truePeakDB,
+                    history: viewModel.loudnessHistory
+                )
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var bottomBar: some View {
+        HStack {
+            Spacer()
+            StartStopButton(
+                isRunning: viewModel.isRunning,
+                startLabel: langManager.l10n.start,
+                stopLabel: langManager.l10n.stop,
+                startAccessibility: langManager.l10n.startAnalysis,
+                stopAccessibility: langManager.l10n.stopAnalysis,
+                action: toggleAnalysis
+            )
+            Spacer()
+        }
+        .padding(.vertical, 16)
+        .background(Color(white: 0.06))
     }
 
     private var languageButton: some View {
@@ -91,21 +153,7 @@ struct ContentView: View {
                 .foregroundStyle(Color.white.opacity(0.5))
         }
         .buttonStyle(.plain)
-        .padding(.trailing, 8)
         .accessibilityLabel(langManager.l10n.language)
-    }
-
-    private var startStopButton: some View {
-        Button(action: toggleAnalysis) {
-            Label(
-                viewModel.isRunning ? langManager.l10n.stop : langManager.l10n.start,
-                systemImage: viewModel.isRunning ? "stop.fill" : "mic.fill"
-            )
-        }
-        .font(.system(size: 13, weight: .medium))
-        .foregroundStyle(viewModel.isRunning ? Color.red : Color.green)
-        .buttonStyle(.plain)
-        .accessibilityLabel(viewModel.isRunning ? langManager.l10n.stopAnalysis : langManager.l10n.startAnalysis)
     }
 
     // MARK: - Actions
@@ -116,6 +164,68 @@ struct ContentView: View {
         } else {
             viewModel.start()
         }
+    }
+}
+
+// MARK: - Start/Stop Button
+
+struct StartStopButton: View {
+    let isRunning: Bool
+    let startLabel: String
+    let stopLabel: String
+    let startAccessibility: String
+    let stopAccessibility: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                ZStack {
+                    Circle()
+                        .fill(isRunning ? Color.red.opacity(0.15) : Color.green.opacity(0.15))
+                        .frame(width: 64, height: 64)
+                    Circle()
+                        .strokeBorder(isRunning ? Color.red : Color.green, lineWidth: 2)
+                        .frame(width: 64, height: 64)
+                    Image(systemName: isRunning ? "stop.fill" : "mic.fill")
+                        .font(.system(size: 24))
+                        .foregroundStyle(isRunning ? Color.red : Color.green)
+                }
+                Text(isRunning ? stopLabel : startLabel)
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
+                    .foregroundStyle(isRunning ? Color.red : Color.green)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(isRunning ? stopAccessibility : startAccessibility)
+        .animation(.easeInOut(duration: 0.2), value: isRunning)
+    }
+}
+
+// MARK: - Mode Tab Button
+
+struct ModeTabButton: View {
+    let mode: DisplayMode
+    let isSelected: Bool
+    let l10n: L10n
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 3) {
+                Image(systemName: mode.systemImage)
+                    .font(.system(size: 14))
+                Text(mode.title(l10n: l10n))
+                    .font(.system(size: 9, weight: .medium, design: .monospaced))
+            }
+            .foregroundStyle(isSelected ? Color.green : Color.white.opacity(0.4))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(isSelected ? Color.green.opacity(0.12) : Color.clear)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+        }
+        .buttonStyle(.plain)
+        .animation(.easeInOut(duration: 0.15), value: isSelected)
     }
 }
 
