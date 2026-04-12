@@ -15,7 +15,7 @@ final class AudioEngine {
         var capturedContinuation: AsyncStream<[Float]>.Continuation?
         // bufferSize(1): if the consumer (MainActor) falls behind, drop old samples
         // rather than letting the queue grow without bound and exhaust memory.
-        sampleStream = AsyncStream([Float].self, bufferingPolicy: .bufferSize(1)) { continuation in
+        sampleStream = AsyncStream([Float].self, bufferingPolicy: .bufferingNewest(1)) { continuation in
             capturedContinuation = continuation
         }
         self.continuation = capturedContinuation
