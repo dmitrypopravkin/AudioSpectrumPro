@@ -203,7 +203,15 @@ struct TunerReading {
 
     init(frequency: Float, referenceA4: Float = 440.0) {
         self.frequency = frequency
+        // Guard against zero/negative frequency or bad reference pitch,
+        // which would produce log2(-inf) → NaN → fatal Int conversion.
+        guard frequency > 0, referenceA4 > 0 else {
+            self.cents = 0; self.note = "–"; self.octave = 4; return
+        }
         let semitones = 12.0 * log2(frequency / referenceA4)
+        guard semitones.isFinite else {
+            self.cents = 0; self.note = "–"; self.octave = 4; return
+        }
         let rounded = semitones.rounded()
         self.cents = Int(((semitones - rounded) * 100).rounded())
         let index = ((Int(rounded) % 12) + 12 + 9) % 12
